@@ -1,4 +1,4 @@
-import customerController from "../controllers/customerController";
+import customerController from "../controllers/userController";
 
 export default function (app) {
     app.get('/customer/get', customerController.get);

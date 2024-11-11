@@ -1,0 +1,1 @@
+import PaymentController from '../controllers/paymentController';
