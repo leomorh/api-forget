@@ -1,8 +1,8 @@
 import userController from "../controllers/userController";
+import authenticate from "../Utils/Authenticate";
 
 export default (app) => {
-    app.post("/user/register", userController.register);
-    app.post("/user/update", userController.update);
-    app.post("/user/delete", userController.delete);
-    
+    app.get("/user/persist/:id", userController.persist);
+    app.get("/user/update", userController.update);
+    app.post("/user/login", userController.login);
 }

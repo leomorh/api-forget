@@ -8,7 +8,7 @@ const Adress = sequelize.define(
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
         },
         zip_code: {
             type: DataTypes.STRING,
@@ -38,13 +38,14 @@ const Adress = sequelize.define(
         freezeTableName: true,
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        onDelete: 'SET NULL',
     },
 
 );
 Adress.belongsTo(User,{
     as: 'user',
-    onDelete: 'NO ACTION',
+    onDelete: 'SET NULL',
     onUpdate: 'NO ACTION',
     foreignKey: {
         name: 'idUser',

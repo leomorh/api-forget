@@ -9,7 +9,7 @@ import OrderProducts from "./OrderProductsModel";
 
 (async () => {
     // await User.sync({ force: true })
-    // await Payment.sync({ force:true })
+    // await PaymentsModel.sync({ force:true })
     // await Cupom.sync({ force:true })
     // await Category.sync({ force:true })
     // await Adress.sync({ force:true })

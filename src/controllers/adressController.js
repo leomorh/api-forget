@@ -1,22 +1,26 @@
 import Adress from "../models/AdressModel";
-import  Jwt  from "jsonwebtoken";
-import Util  from "../utils/getUserByToken";
+import Util from "../Utils/getUserByToken";
 
 
 const getAll = async (req, res) => {
+    let user = await Util.getUserByToken(req.headers.authorization)
     try {
-        let user = await Util.getUserByToken(req.headers.authorization)
-
         const response = await Adress.findAll({
             where: {
                 idUser: user.id
             }
         })
 
+        if (!response) {
+            return res.status(200).send({
+                type: 'warning',
+                message: `Não foi encontrado nenhum registro `
+            });
+        }
         return res.status(200).send({
-            type: 'success', // success, error, warning, info
-            message: 'Registros recuperados com sucesso', // mensagem para o front exibir
-            data: response // json com informações de resposta
+            type: 'success',
+            message: 'Registros recuperados com sucesso',
+            data: response
         });
     } catch (error) {
         return res.status(200).send({
@@ -26,48 +30,6 @@ const getAll = async (req, res) => {
         });
     }
 }
-
-const getById = async (req, res) => {
-    try {
-        let user = await Util.getUserByToken(req.headers.authorization)
-        let { id } = req.params
-        id = id.toString()
-        id = id.replace(/\D/g, '');
-
-        if (!id) {
-            return res.status(200).send({
-                type: 'warning',
-                message: 'Informe um ID valido para consulta'
-            });
-        }
-
-        const response = await Adress.findOne({
-            where: {
-                id,
-                idUser: user.id
-            }
-        })
-        if (!response) {
-            return res.status(200).send({
-                type: 'warning',
-                message: `Não foi encontrado registro com o id = ${id}`
-            });
-        }
-
-        return res.status(200).send({
-            type: 'success', // success, error, warning, info
-            message: 'Registro recuperado com sucesso', // mensagem para o front exibir
-            data: response // json com informações de resposta
-        });
-    } catch (error) {
-        return res.status(200).send({
-            type: 'error',
-            message: 'Ops! Ocorreu um erro!',
-            data: error
-        });
-    }
-}
-
 
 const persist = async (req, res) => {
     try {
@@ -91,8 +53,6 @@ const create = async (token, data, res) => {
     try {
         let { zip_code, state, city, street, district, number } = data;
 
-
-        console.log(data);
         let response = await Adress.create({
             zip_code,
             state,
@@ -102,12 +62,11 @@ const create = async (token, data, res) => {
             number_forget: number,
             idUser: token
         })
-        console.log(response);
 
         return res.status(200).send({
-            type: 'success', // success, error, warning, info
-            message: 'Registro criado com sucesso', // mensagem para o front exibir
-            data: response // json com informações de resposta
+            type: 'success',
+            message: 'Registro criado com sucesso',
+            data: response
         });
 
     } catch (error) {
@@ -119,30 +78,27 @@ const create = async (token, data, res) => {
     }
 }
 
-const update = async (id,token, datas, res) => {
+const update = async (id, datas, res) => {
     try {
-        let user = {"id": token}
         let response = await Adress.findOne({
             where: {
-                id,
-                idUser: user.id
-            }
-        })
+                id: id,
+            },
+        });
         if (!response) {
             return res.status(200).send({
                 type: 'error',
-                message: `Não foi encontrado categorias com o id ${id}`
+                message: `Não foi encontrado com o id ${id}`
             });
         }
+        Object.keys().forEach(data => response[data] = datas[data])
 
-        Object.keys(datas).forEach(data => response[data] = datas[data])
-
-        await response.save()
+        await response.save();
 
         return res.status(200).send({
-            type: 'success', // success, error, warning, info
-            message: 'Registros atualizados com sucesso', // mensagem para o front exibir
-            data: response // json com informações de resposta
+            type: 'success',
+            message: 'Registros atualizados com sucesso',
+            data: response,
         });
     } catch (error) {
         return res.status(200).send({
@@ -156,10 +112,7 @@ const update = async (id,token, datas, res) => {
 
 const delet = async (req, res) => {
     try {
-        let user = await Util.getUserByToken(req.headers.authorization)
-        let { id } = req.body
-        id = id.toString()
-        id = id ? id.replace(/\D/g, '') : null
+        let { id } = req.params
         if (!id) {
             return res.status(200).send({
                 type: 'warning',
@@ -169,10 +122,10 @@ const delet = async (req, res) => {
 
         let response = await Adress.findOne({
             where: {
-                id: id,
-                idUser: user.id
+                id: id
             }
         })
+
 
         if (!response) {
             return res.status(200).send({
@@ -180,8 +133,6 @@ const delet = async (req, res) => {
                 message: `Não foi encontrada categoria com o id ${id}`,
             });
         }
-
-
         await response.destroy()
         return res.status(200).send({
             type: 'sucess',
@@ -197,9 +148,47 @@ const delet = async (req, res) => {
     }
 }
 
+const getById = async (req, res) => {
+    try {
+        let {id} = req.params
+
+        if (!id) {
+            return res.status(200).send({
+                type: 'warning',
+                message: 'Informe um ID valido para consulta'
+            });
+        }
+
+        const response = await Adress.findOne({
+            where: {
+                id: id,
+            }
+        });
+
+        if (!response) {
+            return res.status(200).send({
+                type: 'warning',
+                message: `Não foi encontrado registro com o id = ${id}`
+            });
+        }
+        return res.status(200).send({
+            type: 'success',
+            message: 'Registros recuperados com sucesso',
+            data: response
+        });
+    } catch (error) {
+        return res.status(200).send({
+            type: 'error',
+            message: 'Ops! Ocorreu um erro!',
+            data: error.message
+        });
+    }
+}
+
+
 export default {
-    getAll,
     persist,
+    delet,
     getById,
-    delet
+    getAll,
 }

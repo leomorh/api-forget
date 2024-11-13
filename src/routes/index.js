@@ -1,7 +1,9 @@
-import helloWorldRoute from "./helloWorldRoute";
-import customerRoute from "./customerRoute";
+import userRoute from "./userRoute";
+import adressRoute from "./adressRoute";
+import orderRoute from "./orderRoute";
 
 export default function (app) {
-  helloWorldRoute(app);
-  customerRoute(app);
+  userRoute(app);
+  adressRoute(app);
+  orderRoute(app);
 }

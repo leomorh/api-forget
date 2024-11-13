@@ -1,1 +1,1 @@
-import Payment from "../models/Payment";
+import PaymentsModel from "../models/PaymentsModel";

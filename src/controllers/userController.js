@@ -1,4 +1,7 @@
 import User from '../models/UserModel';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+
 
 const get = async (req, res) => {
     try {
@@ -55,10 +58,26 @@ const create = async (req, res) => {
         })
     }
 }
-
-const register = async (req, res) => {
+const persist = async (req, res) => {
     try {
-        let {   username, name, phone, password, role, cpf, email   }  = data;
+        let { id } = req.params;
+        if (!id) {
+            return await register(req.body, res)
+        }
+        return await update(id, req.body, res)
+
+    } catch (error) {
+        return res.status(200).send({
+            type: 'error',
+            message: 'Ops! Ocorreu um erro!',
+            data: error.message
+        });
+    }
+}
+
+const register = async (data, res) => {
+    try {
+        let { username, name, phone, password, role, cpf,email } = data;
 
         let userExists = await User.findOne({
             where: {
@@ -98,6 +117,7 @@ const register = async (req, res) => {
         });
     }
 }
+
 
 const update = async (id, data, res) => {
     try {
@@ -139,12 +159,56 @@ const update = async (id, data, res) => {
         });
     }
 }
+const login = async (req, res) => {
+    try {
+        let { username, password } = req.body;
+        let user = await User.findOne({
+            where: {
+                username
+            }
+        });
 
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (passwordMatch) {
+            res.send('Login successful');
+        } else {
+            res.status(401).send('Invalid credentials');
+        }
+
+        let token = jwt.sign(
+            { userId: user.id, username: user.username, role: user.role },
+            process.env.TOKEN_KEY,
+            { expiresIn: '1h' }
+        );
+
+        user.token = token;
+        await user.save();
+
+        return res.status(200).send({
+            type: 'sucess',
+            message: 'Bem-vindo! Login realizado com sucesso!',
+            data: user,
+            token,
+        });
+    } catch (error) {
+        return res.status(200).send({
+            type: 'error',
+            message: 'Ops! Ocorreu um erro!',
+        });
+    }
+}
 
 
 export default {
     get,
     create,
     register,
-    update
+    update,
+    persist,
+    login
 }

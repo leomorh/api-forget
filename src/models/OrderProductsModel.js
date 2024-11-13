@@ -3,7 +3,7 @@ import { sequelize } from "../config";
 import Order from "./OrderModel";
 import Product from "./ProductModel";
 
-const OrderProducts = sequelize.define(
+const OrderProductsModel = sequelize.define(
     'orders_products',
     {
         id: {
@@ -31,7 +31,7 @@ const OrderProducts = sequelize.define(
 
 
 Order.belongsToMany(Product, {
-    through: OrderProducts,
+    through: OrderProductsModel,
     as: 'products',
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
@@ -43,7 +43,7 @@ Order.belongsToMany(Product, {
 })
 
 Product.belongsToMany(Order, {
-    through: OrderProducts,
+    through: OrderProductsModel,
     as: 'order',
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
@@ -54,4 +54,4 @@ Product.belongsToMany(Order, {
     }
 })
 
-export default OrderProducts;
+export default OrderProductsModel;
