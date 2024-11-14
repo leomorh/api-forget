@@ -1,6 +1,6 @@
 import User from '../models/UserModel';
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 
 const get = async (req, res) => {
@@ -92,7 +92,7 @@ const register = async (data, res) => {
             });
         }
 
-        let passwordHash = await bcrypt.hash(password, 10);
+        let passwordHash = await crypto.createHash(password);
 
         let response = await User.create({
             username,
@@ -172,7 +172,7 @@ const login = async (req, res) => {
             return res.status(404).send('User not found');
         }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        const passwordMatch = await crypto.timingSafeEqual(password, user.password);
 
         if (passwordMatch) {
             res.send('Login successful');
