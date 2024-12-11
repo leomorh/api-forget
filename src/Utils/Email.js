@@ -34,7 +34,7 @@ async function send(req, res) {
       secure: true, 
       auth: {
         user: "leo.dasilvamohr@gmail.com",
-        pass: "gvkj jxgg aynf dsxh ",
+        pass: "",
       },
     });
 
