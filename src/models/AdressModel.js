@@ -10,29 +10,50 @@ const Adress = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
-        zip_code: {
+        Zipcode: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            field: 'zip_code'
         },
-        state: {
+        State: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            field:'state'
         },
-        city: {
+        City: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            field:'city'
         },
-        street: {
+        Street: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            field:'street'
         },
-        district: {
+        District: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            field:'district'
         },
-        number_forget: {
-            type: DataTypes.STRING
+        Numberforget: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'number_forget'
+        },
+
+        Number: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'number'
+        },
+
+        Complement: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'complement'
         }
+
+
     },
     {
         freezeTableName: true,

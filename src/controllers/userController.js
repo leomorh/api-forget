@@ -2,6 +2,34 @@ import User from '../models/UserModel';
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
+const delet = async (req, res) => {
+    try {
+        const {
+            id
+        } = req.params;
+        let response = []
+
+        if (!id) {
+            response = await User.findAll();
+            return res.status(200).send(response)
+        }
+
+        response = await User.destroy({
+            where: {
+                id: id
+            }
+        });
+        return res.status(200).send({
+                response,
+                type: 'sucess',
+                message: 'usuario excluido com sucesso'
+        });
+    } catch (e) {
+        return res.status(500).send({
+            error: e.message
+        })
+    }
+}
 
 const get = async (req, res) => {
     try {
@@ -28,36 +56,18 @@ const get = async (req, res) => {
     }
 }
 
-const create = async (req, res) => {
+const getAll = async (req, res) => {
     try {
-        const {
-            id,
-            name,
-            street,
-            city,
-            state,
-            creditLimit,
-        } = req.body;
+        const response = await User.findAll();
+        return res.status(200).send(response);
 
-        const response = await User.create({
-            id,
-            name,
-            street,
-            city,
-            state,
-            creditLimit,
-        });
-
-        return res.status(201).send({
-            message: 'Criado Com sucesso',
-            response
-        });
-    } catch (e) {
-        return res.status(500).send({
-            error: e.message
-        })
-    }
+} catch (e) {
+    return res.status(500).send({
+        error: e.message
+    })
 }
+}
+
 const persist = async (req, res) => {
     try {
         let { id } = req.params;
@@ -77,11 +87,11 @@ const persist = async (req, res) => {
 
 const register = async (data, res) => {
     try {
-        let { username, name, phone, password, role, cpf,email } = data;
+        let { Username, Name, Phone, Password, Role, Cpf, Email } = data;
 
         let userExists = await User.findOne({
             where: {
-                username
+                Username
             }
         });
 
@@ -92,21 +102,25 @@ const register = async (data, res) => {
             });
         }
 
-        let passwordHash = await crypto.createHash(password);
+            const passwordHash = (Password) => {
+            const hash = crypto.createHash('sha256');
+            hash.update(Password);
+            return hash.digest('hex');
+        }
 
         let response = await User.create({
-            username,
-            name,
-            phone,
-            passwordHash,
-            role,
-            cpf,
-            email
+            Username,
+            Name,
+            Phone,
+            PasswordHash: passwordHash(Password),
+            Role,
+            Cpf,
+            Email,
         });
 
         return res.status(200).send({
             type: 'sucess',
-            message: 'Usuário cadastrastado com sucesso!',
+            message: 'Usuário cadastrado com sucesso!',
             data: response
         });
     } catch (error) {
@@ -130,11 +144,10 @@ const update = async (id, data, res) => {
         if (!response) {
             return res.status(200).send({
                 type: 'error',
-                message: `Não foi encontrado categorias com o id ${id}`
+                message: `Não foi encontrado usuario com o id ${id}`
             });
         }
-        console.log(Object.keys(data));
-        console.log(data);
+
         let usernameForget = false;
         Object.keys(data).forEach(datas => {
             response[datas] = data[datas]
@@ -159,56 +172,67 @@ const update = async (id, data, res) => {
         });
     }
 }
+
 const login = async (req, res) => {
     try {
-        let { username, password } = req.body;
+        let {Username, Password} = req.body;
         let user = await User.findOne({
             where: {
-                username
+                Username
             }
         });
 
         if (!user) {
-            return res.status(404).send('User not found');
+            return res.status(404).send('Usuario não encontrado');
         }
 
-        const passwordMatch = await crypto.timingSafeEqual(password, user.password);
+        const passwordHash = (Password) => {
+            const hash = crypto.createHash('sha256');
+            hash.update(Password);
+            return hash.digest('hex');
+        }
 
-        if (passwordMatch) {
-            res.send('Login successful');
-        } else {
-            res.status(401).send('Invalid credentials');
+        const storedPasswordHash = user.passwordHash;
+        const providedPasswordHash = passwordHash(Password);
+
+        if (providedPasswordHash !== storedPasswordHash) {
+            return res.status(401).send({
+                type: 'error',
+                message: 'senha incorreta',
+            });
         }
 
         let token = jwt.sign(
-            { userId: user.id, username: user.username, role: user.role },
-            process.env.TOKEN_KEY,
+            { userId: user.id, Username: user.Username, Role: user.Role },
+            process.env.TOKENKEY,
             { expiresIn: '1h' }
         );
 
-        user.token = token;
-        await user.save();
+            return res.status(200).send({
+                type: 'sucess',
+                message: 'Bem-vindo! Login realizado com sucesso!',
+                data: user,
+                token,
+            });
 
-        return res.status(200).send({
-            type: 'sucess',
-            message: 'Bem-vindo! Login realizado com sucesso!',
-            data: user,
-            token,
-        });
-    } catch (error) {
-        return res.status(200).send({
-            type: 'error',
-            message: 'Ops! Ocorreu um erro!',
-        });
-    }
+        } catch(error)
+        {
+            return res.status(200).send({
+                type: 'error',
+                message: 'Ops! Ocorreu um erro!',
+                data: error.message,
+            });
+        }
+
 }
+
+
 
 
 export default {
     get,
-    create,
-    register,
-    update,
     persist,
-    login
+    login,
+    getAll,
+    delet,
 }

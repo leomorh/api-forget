@@ -4,6 +4,7 @@ const { sign, decode, verify } = jwt;
 
 export default async (req, res, next) => {
     try {
+
         const authorization = req.headers.authorization;
 
         if (!authorization) {
@@ -15,6 +16,19 @@ export default async (req, res, next) => {
 
         const token = authorization.split(' ')[1] || null;
         const decodedToken = jwt.decode(token);
+
+        const user = await User.findOne({
+            where: {
+                id: decodedToken.userId,
+            }
+        })
+
+        if(decodedToken.role !== 'admin'){
+            return res.status(200).send({
+            type: 'error',
+            message: 'Você não tem permissão para acessar esse recurso!'
+        })}
+
 
         if (!decodedToken) {
             return res.status(200).send({
@@ -30,13 +44,6 @@ export default async (req, res, next) => {
             })
         }
 
-
-        const user = await User.findOne({
-            where: {
-                id: decodedToken.userId
-            }
-        })
-
         if (!user) {
             return res.status(200).send({
                 type: 'error',
@@ -44,12 +51,13 @@ export default async (req, res, next) => {
             })
         }
 
-
         return next();
+
     } catch (error) {
         return res.status(200).send({
             type: 'error',
-            message: 'Ocorreu um problema!'
+            message: 'Ocorreu um problema!',
+            error: error.message
         })
     }
 }

@@ -40,5 +40,5 @@ const delet = async (req, res) => {
 }
 
 export default {
-    delet
+    delet,
 }

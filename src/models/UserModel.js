@@ -9,49 +9,56 @@ const User = sequelize.define(
             primaryKey: true,
             autoIncrement: true
         },
-        username: {
+        Username: {
             type: DataTypes.STRING(50),
             allowNull: false,
-            unique: true
+            unique: true,
+            field: 'username'
         },
-        cpf:{
+        Cpf:{
             type: DataTypes.STRING(14),
             allowNull: false,
-            unique: true
+            unique: true,
+            field: 'cpf'
         },
-        name: {
+        Name: {
             type: DataTypes.STRING(200),
-            allowNull: false
+            allowNull: false,
+            field: 'name'
         },
-        phone: {
+        Phone: {
             type: DataTypes.STRING(16),
             allowNull: false,
+            field: 'phone'
         },
-        passwordHash: {
-            type: DataTypes.STRING,
+        PasswordHash: {
+            type: DataTypes.STRING(255),
             allowNull: false,
             field: 'password_hash'
         },
         token: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(255),
             allowNull: true
         },
-        role: {
-            type: DataTypes.STRING, // admin ou customer
-            allowNull: false,
-            defaultValue: 'customer'
+        Role: {
+            type: DataTypes.STRING(255), // admin ou customer
+            allowNull: true,
+            defaultValue: 'customer',
+            field: 'role'
         },
-        cart: {
+        Cart: {
             type: DataTypes.JSONB,
-            allowNull:true
+            allowNull:true,
+            field: 'cart'
         },
-        email: {
-            type: DataTypes.STRING,
+        Email: {
+            type: DataTypes.STRING(255),
             unique: true,
-            allowNull: false
+            allowNull: false,
+            field: 'email'
         },
         recuperation:{
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(255),
             allowNull:true,
             expires: 3600
         }

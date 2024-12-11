@@ -1,17 +1,11 @@
 import Adress from "../models/AdressModel";
-import Util from "../Utils/getUserByToken";
 
 
 const getAll = async (req, res) => {
-    let user = await Util.getUserByToken(req.headers.authorization)
     try {
-        const response = await Adress.findAll({
-            where: {
-                idUser: user.id
-            }
-        })
+        const response = await Adress.findAll();
 
-        if (!response) {
+        if (!response || response.length === 0) {
             return res.status(200).send({
                 type: 'warning',
                 message: `Não foi encontrado nenhum registro `
@@ -23,6 +17,23 @@ const getAll = async (req, res) => {
             data: response
         });
     } catch (error) {
+        return res.status(500).send({
+            type: 'error',
+            message: 'Ops! Ocorreu um erro!',
+            data: error.message
+        });
+    }
+};
+
+const persist = async (req, res) => {
+    try {
+        let { id } = req.params;
+        if (!id) {
+            return await register(req.body, res)
+        }
+        return await update(id, req.body, res)
+
+    } catch (error) {
         return res.status(200).send({
             type: 'error',
             message: 'Ops! Ocorreu um erro!',
@@ -31,36 +42,19 @@ const getAll = async (req, res) => {
     }
 }
 
-const persist = async (req, res) => {
+const register = async (data, res) => {
     try {
-        let user = await Util.getUserByToken(req.headers.authorization)
-        let { id } = req.params;
-        if (!id) {
-
-            return await create(user.id, req.body, res)
-        }
-        return await update(id, user.id ,req.body, res)
-    } catch (error) {
-        return res.status(200).send({
-            type: 'error',
-            message: 'Ops! Ocorreu um erro!',
-            data: error
-        });
-    }
-}
-
-const create = async (token, data, res) => {
-    try {
-        let { zip_code, state, city, street, district, number } = data;
+        let { Zipcode, State, City, Street, District, Number, Complement, idUser } = data;
 
         let response = await Adress.create({
-            zip_code,
-            state,
-            city,
-            street,
-            district,
-            number_forget: number,
-            idUser: token
+            Zipcode,
+            State,
+            City,
+            Street,
+            District,
+            Number,
+            Complement,
+            idUser
         })
 
         return res.status(200).send({
@@ -78,75 +72,90 @@ const create = async (token, data, res) => {
     }
 }
 
-const update = async (id, datas, res) => {
+const update = async (id, datas = {}, res) => {
     try {
-        let response = await Adress.findOne({
-            where: {
-                id: id,
-            },
+
+      let response = await Adress.findOne({
+        where: {
+          id
+        },
+      });
+  
+
+      if (!response) {
+        return res.status(404).send({
+          type: 'error',
+          message: `Não foi encontrado com o id ${id}`
         });
-        if (!response) {
-            return res.status(200).send({
-                type: 'error',
-                message: `Não foi encontrado com o id ${id}`
-            });
+      }
+  
+
+      Object.keys(datas).forEach(data => {
+        if (datas[data] !== undefined) { 
+          response[data] = datas[data];
         }
-        Object.keys().forEach(data => response[data] = datas[data])
+      });
+  
 
-        await response.save();
+      await response.save();
+  
 
-        return res.status(200).send({
-            type: 'success',
-            message: 'Registros atualizados com sucesso',
-            data: response,
-        });
+      return res.status(200).send({
+        type: 'success',
+        message: 'Registros atualizados com sucesso',
+        data: response,
+      });
     } catch (error) {
-        return res.status(200).send({
-            type: 'error',
-            message: 'Ops! Ocorreu um erro!',
-            data: error.message
-        });
+      return res.status(500).send({
+        type: 'error',
+        message: 'Ops! Ocorreu um erro!',
+        data: error.message
+      });
     }
-}
+  };
+  
 
 
-const delet = async (req, res) => {
+  const delet = async (req, res) => {
     try {
-        let { id } = req.params
+        let { id } = req.params;
+
         if (!id) {
-            return res.status(200).send({
+            return res.status(400).send({
                 type: 'warning',
-                message: 'Informe um id válido para deletar a categoria',
+                message: 'Informe um id válido para deletar o endereço',
             });
         }
 
         let response = await Adress.findOne({
             where: {
-                id: id
+                id
             }
-        })
-
+        });
 
         if (!response) {
-            return res.status(200).send({
+            return res.status(404).send({
                 type: 'warning',
-                message: `Não foi encontrada categoria com o id ${id}`,
+                message: `Não foi encontrado o endereço com o id ${id}`,
             });
         }
-        await response.destroy()
+
+        await response.destroy(); 
+
         return res.status(200).send({
-            type: 'sucess',
-            message: `registro com o id ${id} deletado com sucesso`,
+            type: 'success',  
+            message: `Endereço com o id ${id} deletado com sucesso`,
         });
 
     } catch (error) {
-        return res.status(200).send({
+        return res.status(500).send({  
             type: 'error',
             message: 'Ops! Ocorreu um erro!',
-            data: error.message
+            data: error.message,
         });
     }
-}
+};
+
 
 const getById = async (req, res) => {
     try {
