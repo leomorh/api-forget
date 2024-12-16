@@ -1,6 +1,8 @@
 import userController from "../controllers/userController";
 import Authenticate from "../Utils/Authenticate";
 import Email from "../Utils/Email";
+import verifyToken from "../Utils/verifyToken";
+
 
 
 export default (app) => {
@@ -13,5 +15,6 @@ export default (app) => {
     app.post("/send", Email.send);
     app.post("/code", Email.receiveCode);
     app.post("/newPassword", Email.updatePassword);
+    app.post("/getByToken", verifyToken)
 
 }

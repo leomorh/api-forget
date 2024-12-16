@@ -23,7 +23,7 @@ export default async (req, res, next) => {
             }
         })
 
-        if(decodedToken.role !== 'admin'){
+        if(decodedToken.Role !== 'admin'){
             return res.status(200).send({
             type: 'error',
             message: 'Você não tem permissão para acessar esse recurso!'

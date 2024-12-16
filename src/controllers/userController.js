@@ -20,9 +20,9 @@ const delet = async (req, res) => {
             }
         });
         return res.status(200).send({
-                response,
-                type: 'sucess',
-                message: 'usuario excluido com sucesso'
+            response,
+            type: 'sucess',
+            message: 'usuario excluido com sucesso'
         });
     } catch (e) {
         return res.status(500).send({
@@ -38,7 +38,7 @@ const get = async (req, res) => {
         } = req.params;
         let response = []
 
-        if (!id){
+        if (!id) {
             response = await User.findAll();
             return res.status(200).send(response);
         }
@@ -61,11 +61,11 @@ const getAll = async (req, res) => {
         const response = await User.findAll();
         return res.status(200).send(response);
 
-} catch (e) {
-    return res.status(500).send({
-        error: e.message
-    })
-}
+    } catch (e) {
+        return res.status(500).send({
+            error: e.message
+        })
+    }
 }
 
 const persist = async (req, res) => {
@@ -102,7 +102,7 @@ const register = async (data, res) => {
             });
         }
 
-            const passwordHash = (Password) => {
+        const passwordHash = (Password) => {
             const hash = crypto.createHash('sha256');
             hash.update(Password);
             return hash.digest('hex');
@@ -175,15 +175,17 @@ const update = async (id, data, res) => {
 
 const login = async (req, res) => {
     try {
-        let {Username, Password} = req.body;
+        let { Username, Password } = req.body;
         let user = await User.findOne({
             where: {
-                Username
+                Username: Username
             }
         });
 
         if (!user) {
-            return res.status(404).send('Usuario não encontrado');
+            return res.status(200).send({ type: 'error',
+                 message: 'Usuario não encontrado!'
+                 });
         }
 
         const passwordHash = (Password) => {
@@ -192,13 +194,13 @@ const login = async (req, res) => {
             return hash.digest('hex');
         }
 
-        const storedPasswordHash = user.passwordHash;
+        const storedPasswordHash = user.PasswordHash;
         const providedPasswordHash = passwordHash(Password);
 
         if (providedPasswordHash !== storedPasswordHash) {
-            return res.status(401).send({
+            return res.status(200).send({
                 type: 'error',
-                message: 'senha incorreta',
+                message: 'senha incorreta!',
             });
         }
 
@@ -208,21 +210,20 @@ const login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-            return res.status(200).send({
-                type: 'sucess',
-                message: 'Bem-vindo! Login realizado com sucesso!',
-                data: user,
-                token,
-            });
+        return res.status(200).send({
+            type: 'success',
+            message: 'Bem-vindo! Login realizado com sucesso!',
+            data: user,
+            token,
+        });
 
-        } catch(error)
-        {
-            return res.status(200).send({
-                type: 'error',
-                message: 'Ops! Ocorreu um erro!',
-                data: error.message,
-            });
-        }
+    } catch (error) {
+        return res.status(200).send({
+            type: 'error',
+            message: 'Ops! Ocorreu um erro!',
+            data: error.message,
+        });
+    }
 
 }
 

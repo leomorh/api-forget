@@ -2,9 +2,9 @@ import AdressController from "../controllers/adressController";
 import Authenticate from "../Utils/Authenticate"
 
 export default (app) => {
-    app.post('/adress/persist/:id', AdressController.persist);
-    app.post('/adress/delet/:id', AdressController.delet);
-    app.get('/adress/getid/:id', AdressController.getById);
-    app.get('/adress/getall', AdressController.getAll);
-    app.post('/adress/persist', AdressController.persist);
+    app.post('/adress/persist/:id',Authenticate, AdressController.persist);
+    app.post('/adress/delet/:id',Authenticate, AdressController.delet);
+    app.get('/adress/getid/:id',Authenticate, AdressController.getById);
+    app.get('/adress/getall', Authenticate, AdressController.getAll);
+    app.post('/adress/persist',Authenticate, AdressController.persist);
 }   
